@@ -3,7 +3,7 @@ const shopService = require('../services/shop.service');
 exports.getAll = async (req, res) => {
     try {
         const shops = await shopService.getAll();
-        console.log('Get all shops:', shops);
+        console.log('Get all shops:', shops.length);
         res.json(shops);
     } catch (error) {
         res.status(500).json({ message: error.message });
