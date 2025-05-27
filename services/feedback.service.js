@@ -1,6 +1,6 @@
 const axios = require('axios');
 const Shop = require('../models/shop.model');
-const GeminiAIService = require('./gemini.service');
+const geminiAIService = require('./gemini.service');
 const { removeMarkdown } = require('../config/config');
 
 const processFeedbacks = async () => {
@@ -106,8 +106,7 @@ const handleShopFeedbacks = async (shop) => {
             if (!feedback.text) {
                 answer = generateReply(feedback);
             } else {
-                answer = await GeminiAIService.getAnswer(`Help me answer customer feedback about the product on the wildberries e-commerce site in russian, just return me the answer: question: ${feedback.text}, product: ${feedback.productDetails.productName}, product valuation ${feedback.productValuation}, color ${feedback.color}, id ${feedback.productDetails.nmId}`);
-                answer = removeMarkdown(answer);
+                answer = await geminiAIService.recommendReplyFeedback(feedback);
             }
             console.log('Answer: ', answer);
             if (answer) {

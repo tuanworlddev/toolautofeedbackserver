@@ -1,5 +1,5 @@
 const axios = require('axios');
-const GeminiAIService = require('./gemini.service');
+const geminiAIService = require('./gemini.service');
 const { removeMarkdown } = require('../config/config');
 
 const getCountUnanswered = async (apiKey) => {
@@ -12,7 +12,7 @@ const getCountUnanswered = async (apiKey) => {
         });
         return countResponse.data.data;
     } catch (error) {
-        throw new Error('Error get count unanswer:', $error);
+        throw new Error(`Error get count unanswer: ${error}`);
     }
 }
 
@@ -35,6 +35,21 @@ const getQuestions = async (apiKey, isAnswered, take = 20, skip = 0, order = "da
     } catch (error) {
         console.error('Error getting questions:', error.response?.data || error.message);
         throw new Error(`Error getting questions: ${error.message}`);
+    }
+};
+
+const getQuestionById = async (apiKey, questionId) => {
+    try {
+        const response = await axios.get(`https://feedbacks-api.wildberries.ru/api/v1/question?id=${questionId}`, {
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+        });
+        return response.data?.data;
+    } catch (error) {
+        console.error('Error getting question:', error.response?.data || error.message);
+        throw new Error(`Error getting question: ${error.message}`);
     }
 };
 
@@ -77,15 +92,7 @@ const handleReplyQuestion = async (shop) => {
         try {
             counter++;
             console.log('Question counter:', counter);
-            let answer = await GeminiAIService.getAnswer(`You are a professional customer support agent for the Russian e-commerce platform Wildberries. 
-      Answer the customer's question in Russian, ensuring the response is polite, professional, and follows Wildberries' guidelines. 
-      Use the following product details to provide accurate information:
-      - Product: ${question.productDetails.productName}
-      - Brand: ${question.productDetails.brandName}
-      - Арт. продавца: ${question.productDetails.supplierArticle}
-      - Артикул WB: ${question.productDetails.nmId}
-      - Customer question: ${question.text}`);
-            answer = removeMarkdown(answer);
+            let answer = await geminiAIService.recommendReplyQuestion(question);
             console.log('Answer: ', removeMarkdown(answer));
             if (answer) {
                 await replyQuestion(shop.apiKey, question.id, answer);
@@ -97,4 +104,4 @@ const handleReplyQuestion = async (shop) => {
     }
 }
 
-module.exports = { getCountUnanswered, handleReplyQuestion, getQuestions }
+module.exports = { getCountUnanswered, handleReplyQuestion, getQuestions, getQuestionById, replyQuestion }
