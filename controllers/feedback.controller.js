@@ -19,6 +19,7 @@ exports.countUnanswered = async (req, res) => {
             return res.status(400).json({ message: "Missing 'apikey' in query parameters." });
         }
         const count = await feedbackService.getCountUnanswered(apiKey);
+        console.log('Get count feedbacks unanswered:', count.countUnanswered);
         res.json(count);
     } catch (error) {
         res.status(500).json({ message: error.message });

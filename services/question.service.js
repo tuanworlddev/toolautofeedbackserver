@@ -70,7 +70,7 @@ const handleReplyQuestion = async (shop) => {
 
     if (countUnanswered === 0) return;
 
-    const questions = await getQuestions(shop.apiKey, false, 3, 0, "dateAsc");
+    const questions = await getQuestions(shop.apiKey, false, countUnanswered, 0, "dateAsc");
 
     let counter = 0;
     for (const question of questions) {
