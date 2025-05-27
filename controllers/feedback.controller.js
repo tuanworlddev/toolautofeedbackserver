@@ -14,7 +14,11 @@ exports.processOne = async (req, res) => {
 
 exports.countUnanswered = async (req, res) => {
     try {
-        const count = await feedbackService.getCountUnanswered(req.query.apikey);
+        const apiKey = req.query.apiKey;
+        if (!apiKey) {
+            return res.status(400).json({ message: "Missing 'apikey' in query parameters." });
+        }
+        const count = await feedbackService.getCountUnanswered(apiKey);
         res.json(count);
     } catch (error) {
         res.status(500).json({ message: error.message });

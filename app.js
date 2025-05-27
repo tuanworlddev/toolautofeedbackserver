@@ -7,6 +7,7 @@ const feedbackService = require('./services/feedback.service');
 
 const shopRoutes = require('./routes/shop.routes');
 const feedbackRoutes = require('./routes/feedback.routes');
+const questionRoutes = require('./routes/question.routes');
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/shops', shopRoutes);
 app.use('/api/feedbacks', feedbackRoutes);
+app.use('/api/questions', questionRoutes);
 
 schedule.scheduleJob('0 * * * *', async () => {
     console.log('Running feedback automation job...');

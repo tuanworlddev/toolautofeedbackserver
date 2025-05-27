@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Shop = require('../models/shop.model');
 const GeminiAIService = require('./gemini.service');
+const { removeMarkdown } = require('../config/config');
 
 const processFeedbacks = async () => {
     try {
@@ -95,23 +96,22 @@ const handleShopFeedbacks = async (shop) => {
     if (countUnanswered === 0) return;
 
     const feedbacks = await getFeedbacks(shop.apiKey, false, countUnanswered, 0, "dateAsc");
-    let processedFeedbacks = [];
 
     let counter = 0;
     for (const feedback of feedbacks) {
         try {
             counter++;
-            console.log('Question counter:', counter);
+            console.log('Feedback counter:', counter);
             let answer = '';
             if (!feedback.text) {
                 answer = generateReply(feedback);
             } else {
                 answer = await GeminiAIService.getAnswer(`Help me answer customer feedback about the product on the wildberries e-commerce site in russian, just return me the answer: question: ${feedback.text}, product: ${feedback.productDetails.productName}, product valuation ${feedback.productValuation}, color ${feedback.color}, id ${feedback.productDetails.nmId}`);
+                answer = removeMarkdown(answer);
             }
             console.log('Answer: ', answer);
             if (answer) {
                 await replyToFeedback(shop.apiKey, feedback.id, answer);
-                processedFeedbacks.push({ ...feedback, answer })
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
