@@ -20,3 +20,27 @@ exports.countUnanswered = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+exports.getFeedbacks = async (req, res) => {
+    try {
+        const { apiKey, isAnswered, take = 20, skip = 0, order = 'dateDesc' } = req.query;
+
+        if (!apiKey) {
+            return res.status(400).json({ message: "Missing 'apikey' in query parameters." });
+        }
+
+        const feedbacks = await feedbackService.getFeedbacks(
+            apiKey,
+            isAnswered,
+            parseInt(take),
+            parseInt(skip),
+            order
+        );
+
+        res.json({ feedbacks });
+    } catch (error) {
+        console.error('Error in getFeedbacks controller:', error);
+        res.status(500).json({ message: error.message || 'Internal server error' });
+    }
+};
+

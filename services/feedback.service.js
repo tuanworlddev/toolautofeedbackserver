@@ -15,25 +15,27 @@ const processFeedbacks = async () => {
     }
 }
 
-const getFeedbacks = async (apiKey, isAnswered, count) => {
+const getFeedbacks = async (apiKey, isAnswered, take = 20, skip = 0, order = "dateDesc") => {
     try {
-        const feedbacksResponse = await axios.get('https://feedbacks-api.wildberries.ru/api/v1/feedbacks', {
+        const response = await axios.get('https://feedbacks-api.wildberries.ru/api/v1/feedbacks', {
             headers: {
                 Authorization: `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
             },
             params: {
-                isAnswered: isAnswered,
-                take: count,
-                skip: 0,
-                order: 'dateAsc'
-            }
+                isAnswered,
+                take,
+                skip,
+                order,
+            },
         });
-        return feedbacksResponse.data.data.feedbacks;
+
+        return response.data?.data?.feedbacks || [];
     } catch (error) {
-        throw new Error('Error get feedbacks:', error);
+        console.error('Error getting feedbacks:', error.response?.data || error.message);
+        throw new Error(`Error getting feedbacks: ${error.message}`);
     }
-}
+};
 
 const replyToFeedback = async (apiKey, feedbackId, answer) => {
     try {
@@ -92,26 +94,24 @@ const handleShopFeedbacks = async (shop) => {
 
     if (countUnanswered === 0) return;
 
-    const feedbacks = await getFeedbacks(shop.apiKey, false, countUnanswered);
+    const feedbacks = await getFeedbacks(shop.apiKey, false, countUnanswered, 0, "dateAsc");
+    let processedFeedbacks = [];
+
     let counter = 0;
     for (const feedback of feedbacks) {
         try {
             counter++;
             console.log('Question counter:', counter);
+            let answer = '';
             if (!feedback.text) {
-                console.log(`Question: null, product valuation ${feedback.productValuation}`);
-                const answer = generateReply(feedback);
-                console.log('Answer: ', answer);
-                await replyToFeedback(shop.apiKey, feedback.id, answer);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                continue;
+                answer = generateReply(feedback);
+            } else {
+                answer = await GeminiAIService.getAnswer(`Help me answer customer feedback about the product on the wildberries e-commerce site in russian, just return me the answer: question: ${feedback.text}, product: ${feedback.productDetails.productName}, product valuation ${feedback.productValuation}, color ${feedback.color}, id ${feedback.productDetails.nmId}`);
             }
-            console.log(`Question: ${feedback.text}, product valuation ${feedback.productValuation}`);
-            const answer = await GeminiAIService.getAnswer(`Help me answer customer feedback about the product on the wildberries e-commerce site in russian, just return me the answer: question: ${feedback.text}, product: ${feedback.productDetails.productName}, product valuation ${feedback.productValuation}, color ${feedback.color}, id ${feedback.productDetails.nmId}`);
             console.log('Answer: ', answer);
             if (answer) {
                 await replyToFeedback(shop.apiKey, feedback.id, answer);
-                console.log('Counter:', counter);
+                processedFeedbacks.push({ ...feedback, answer })
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
@@ -120,4 +120,5 @@ const handleShopFeedbacks = async (shop) => {
     }
 }
 
-module.exports = { processFeedbacks, getCountUnanswered, handleShopFeedbacks }
+
+module.exports = { processFeedbacks, getCountUnanswered, handleShopFeedbacks, getFeedbacks }
