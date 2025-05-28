@@ -71,6 +71,7 @@ const replyQuestion = async (apiKey, questionId, answer) => {
                 },
             }
         );
+        console.log('Reply question status:', response.status);
         return response.status;
     } catch (error) {
         console.error('Error reply feedback:', error.response?.data || error.message);
@@ -93,7 +94,8 @@ const handleReplyQuestion = async (shop) => {
             counter++;
             console.log('Question counter:', counter);
             let answer = await geminiAIService.recommendReplyQuestion(question);
-            console.log('Answer: ', removeMarkdown(answer));
+            console.log('Question:', question.text);
+            console.log('Answer:', removeMarkdown(answer));
             if (answer) {
                 await replyQuestion(shop.apiKey, question.id, answer);
             }

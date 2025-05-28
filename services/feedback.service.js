@@ -108,6 +108,7 @@ const handleShopFeedbacks = async (shop) => {
             } else {
                 answer = await geminiAIService.recommendReplyFeedback(feedback);
             }
+            console.log('Question:', feedback.text, 'Product valuation:', feedback.productValuation);
             console.log('Answer: ', answer);
             if (answer) {
                 await replyToFeedback(shop.apiKey, feedback.id, answer);
