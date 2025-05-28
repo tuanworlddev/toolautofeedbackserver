@@ -18,9 +18,24 @@ const getAnswer = async (contents) => {
 
 const recommendReplyFeedback = async (feedback) => {
   try {
-    const answer = await getAnswer(
-      `Help me answer customer feedback about the product on the wildberries e-commerce site in russian, just return me the answer: question: ${feedback.text}, product: ${feedback.productDetails.productName}, product valuation ${feedback.productValuation}, color ${feedback.color}, id ${feedback.productDetails.nmId}`,
-    );
+    const greeting = feedback.userName ? `Уважаемый ${feedback.userName},` : 'Уважаемый покупатель,';
+
+    const prompt = `
+      You are a shop assistant representing a store selling on the Russian e-commerce platform Wildberries.
+      Respond to the customer's feedback in Russian, as if you are directly communicating on behalf of the store.
+      Ensure the response is polite, professional, and aligns with Wildberries' guidelines.
+      Use the following details to craft a personalized response:
+      - Greeting: ${greeting}
+      - Product: ${feedback.productDetails.productName}
+      - Brand name: ${feedback.productDetails.brandName}
+      - Product valuation: ${feedback.productValuation}
+      - Color: ${feedback.color}
+      - Product ID: ${feedback.productDetails.nmId}
+      - Customer feedback: ${feedback.text}
+      If the feedback is negative, offer a solution (e.g., replacement, discount, or return instructions).
+      If positive, express gratitude and encourage future purchases with a friendly suggestion (e.g., check out similar products).
+    `;
+    const answer = await getAnswer(prompt);
     return removeMarkdown(answer);
   } catch (error) {
     console.error("Error get answer:", error);
@@ -30,15 +45,29 @@ const recommendReplyFeedback = async (feedback) => {
 
 const recommendReplyQuestion = async (question) => {
   try {
-    const answer =
-      await getAnswer(`You are a professional customer support agent for the Russian e-commerce platform Wildberries. 
-      Answer the customer's question in Russian, ensuring the response is polite, professional, and follows Wildberries' guidelines. 
-      Use the following product details to provide accurate information:
+    const questionType = question.text.includes('доставка') ? 'delivery' : 
+                        question.text.includes('возврат') ? 'return' : 
+                        question.text.includes('размер') ? 'size' : 'general';
+
+    const prompt = `
+      You are a shop assistant representing a store selling on the Russian e-commerce platform Wildberries.
+      Answer the customer's question in Russian, using a friendly and helpful tone, as if you are directly communicating on behalf of the store.
+      Ensure the response is polite, professional, and aligns with Wildberries' guidelines.
+      Use the following details to provide accurate information:
+      - Greeting: Уважаемый покупатель,
       - Product: ${question.productDetails.productName}
       - Brand: ${question.productDetails.brandName}
       - Арт. продавца: ${question.productDetails.supplierArticle}
       - Артикул WB: ${question.productDetails.nmId}
-      - Customer question: ${question.text}`);
+      - Customer question: ${question.text}
+      - Question type: ${questionType}
+      If the question is about delivery, provide estimated delivery times or tracking instructions.
+      If about returns, explain the return process per Wildberries' rules.
+      If about size, provide sizing guidance or suggest contacting for more details.
+      For general questions, provide a helpful answer and encourage further engagement (e.g., invite to view other products).
+    `;
+
+    const answer = await getAnswer(prompt);
     return removeMarkdown(answer);
   } catch (error) {
     console.error("Error get answer:", error);
