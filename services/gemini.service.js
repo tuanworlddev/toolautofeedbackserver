@@ -4,37 +4,31 @@ const { removeMarkdown } = require('../config/config');
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const getAnswer = async (contents) => {
-    try {
-        const response = await genAI.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: contents,
-        });
-        return response.text.trim();
-    } catch (error) {
-        console.error('Error get answer:', error);
-        throw new Error(`Error get answer: ${error}`);
-    }
+  try {
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: contents,
+    });
+    return response.text.trim();
+  } catch (error) {
+    console.error('Error get answer:', error);
+    throw new Error(`Error get answer: ${error}`);
+  }
 };
 
 const recommendReplyFeedback = async (feedback) => {
   try {
     const greeting = feedback.userName ? `Уважаемый ${feedback.userName},` : 'Уважаемый покупатель,';
 
-    const prompt = `
-      You are a shop assistant representing a store selling on the Russian e-commerce platform Wildberries.
-      Respond to the customer's feedback in Russian, as if you are directly communicating on behalf of the store.
-      Ensure the response is polite, professional, and aligns with Wildberries' guidelines.
-      Use the following details to craft a personalized response:
-      - Greeting: ${greeting}
-      - Product: ${feedback.productDetails.productName}
-      - Brand name: ${feedback.productDetails.brandName}
-      - Product valuation: ${feedback.productValuation}
-      - Color: ${feedback.color}
-      - Product ID: ${feedback.productDetails.nmId}
-      - Customer feedback: ${feedback.text}
-      If the feedback is negative, offer a solution (e.g., replacement, discount, or return instructions).
-      If positive, express gratitude and encourage future purchases with a friendly suggestion (e.g., check out similar products).
-    `;
+    const prompt = `Вы — ассистент магазина, представляющего бренд на маркетплейсе Wildberries. Отвечайте на отзыв клиента на русском языке от имени магазина. Ответ должен быть вежливым, профессиональным и соответствовать правилам Wildberries. Используйте следующие данные для персонализированного ответа:  
+- Приветствие: ${greeting}  
+- Товар: ${feedback.productDetails.productName}  
+- Бренд: ${feedback.productDetails.brandName}  
+- Оценка товара: ${feedback.productValuation}  
+- Цвет: ${feedback.color}  
+- ID товара: ${feedback.productDetails.nmId}  
+- Отзыв клиента: ${feedback.text}  
+Если отзыв отрицательный, предложите решение (например, замена, скидка или инструкция по возврату). Если положительный, выразите благодарность и предложите покупателю ознакомиться с другими товарами. Отвечайте только текстом ответа, без дополнительных комментариев или вариантов.`;
     const answer = await getAnswer(prompt);
     return removeMarkdown(answer);
   } catch (error) {
@@ -45,9 +39,9 @@ const recommendReplyFeedback = async (feedback) => {
 
 const recommendReplyQuestion = async (question) => {
   try {
-    const questionType = question.text.includes('доставка') ? 'delivery' : 
-                        question.text.includes('возврат') ? 'return' : 
-                        question.text.includes('размер') ? 'size' : 'general';
+    const questionType = question.text.includes('доставка') ? 'delivery' :
+      question.text.includes('возврат') ? 'return' :
+        question.text.includes('размер') ? 'size' : 'general';
 
     const prompt = `
       You are a shop assistant representing a store selling on the Russian e-commerce platform Wildberries.
