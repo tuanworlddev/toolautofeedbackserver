@@ -102,11 +102,14 @@ const handleShopFeedbacks = async (shop) => {
         try {
             counter++;
             console.log('Feedback counter:', counter);
-            let answer = '';
+            let answer;
             if (!feedback.text) {
                 answer = generateReply(feedback);
             } else {
                 answer = await geminiAIService.recommendReplyFeedback(feedback);
+            }
+            if (!answer) {
+                answer = generateReply(feedback);
             }
             console.log('Question:', feedback.text, 'Product valuation:', feedback.productValuation);
             console.log('Answer: ', answer);
