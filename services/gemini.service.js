@@ -32,8 +32,7 @@ const recommendReplyFeedback = async (feedback) => {
     const answer = await getAnswer(prompt);
     return removeMarkdown(answer);
   } catch (error) {
-    console.error("Error get answer:", error);
-    throw new Error(`Error get answer: ${error}`);
+    console.error("Error get answer gemini AI");
   }
 };
 
