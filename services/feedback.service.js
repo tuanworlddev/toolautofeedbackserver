@@ -84,7 +84,7 @@ const getCountUnanswered = async (apiKey) => {
         });
         return countResponse.data.data;
     } catch (error) {
-        throw new Error('Error get count unanswer:', $error);
+        throw new Error('Error get count unanswer:', error);
     }
 }
 
