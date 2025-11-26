@@ -1,17 +1,26 @@
+require('dotenv').config(); // Đọc .env trong config file
+
 module.exports = {
   apps: [{
-    name: 'tool-backend',
+    name: 'auto feedback',
     script: './server.js',
     instances: 'max',
     exec_mode: 'cluster',
     
-    // Chỉ định file env cho môi trường cụ thể
+    // Truyền biến môi trường trực tiếp
     env: {
       NODE_ENV: 'development',
+      PORT: process.env.PORT || 3400,
+      MONGO_URI: process.env.MONGO_URI,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     },
     env_production: {
       NODE_ENV: 'production',
-      env_file: ".env"
+      PORT: process.env.PORT || 3400,
+      MONGO_URI: process.env.MONGO_URI,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     }
   }]
 };
