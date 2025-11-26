@@ -10,7 +10,7 @@ const feedbackRoutes = require('./routes/feedback.routes');
 const questionRoutes = require('./routes/question.routes');
 
 const app = express();
-app.use(cors());
+app.use(cors());    
 app.use(express.json());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
